@@ -18,13 +18,17 @@ public class OrderService {
     private final List<Order> orders = new ArrayList<>();
 
     public Order createOrder(String orderId) throws InvalidOrderIdException {
+        return createOrder(orderId, "Guest");
+    }
+
+    public Order createOrder(String orderId, String customerName) throws InvalidOrderIdException {
         String normalizedOrderId = normalizeOrderId(orderId);
 
         if (findOrderById(normalizedOrderId).isPresent()) {
             throw new InvalidOrderIdException("Ma don hang da ton tai: " + normalizedOrderId);
         }
 
-        Order order = new Order(normalizedOrderId);
+        Order order = new Order(normalizedOrderId, customerName);
         orders.add(order);
         return order;
     }
@@ -34,7 +38,6 @@ public class OrderService {
         if (menuItem == null) {
             throw new InvalidInputException("Mon an khong hop le");
         }
-
         if (quantity <= 0) {
             throw new InvalidInputException("So luong phai lon hon 0");
         }
@@ -47,13 +50,12 @@ public class OrderService {
                     "So luong vuot qua ton kho. Ton hien tai: " + menuItem.getStock());
         }
 
-        order.addItem(new OrderItem(menuItem, quantity));
+        order.addItem(menuItem, quantity);
         menuItem.setStock(menuItem.getStock() - quantity);
     }
 
     public Order getOrderById(String orderId) throws InvalidOrderIdException {
         String normalizedOrderId = normalizeOrderId(orderId);
-
         return findOrderById(normalizedOrderId)
                 .orElseThrow(() -> new InvalidOrderIdException(
                         "Khong tim thay don hang voi ma: " + normalizedOrderId));
@@ -66,7 +68,7 @@ public class OrderService {
 
         String normalizedOrderId = orderId.trim();
         return orders.stream()
-                .filter(order -> order.getId().equalsIgnoreCase(normalizedOrderId))
+                .filter(order -> order.getOrderId().equalsIgnoreCase(normalizedOrderId))
                 .findFirst();
     }
 
@@ -94,6 +96,7 @@ public class OrderService {
         order.setStatus(newStatus);
     }
 
+    // Optional helper kept for menu flow: remove a line item and restore stock
     public void removeItemFromOrder(String orderId, String menuItemId)
             throws InvalidOrderIdException, InvalidInputException {
         if (menuItemId == null || menuItemId.trim().isEmpty()) {
@@ -141,4 +144,3 @@ public class OrderService {
         }
     }
 }
-
