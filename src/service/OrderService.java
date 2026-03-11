@@ -17,6 +17,9 @@ public class OrderService {
 
     private final List<Order> orders = new ArrayList<>();
 
+    public OrderService(MenuService menuService) {
+    }
+
     public Order createOrder(String orderId) throws InvalidOrderIdException {
         return createOrder(orderId, "Guest");
     }

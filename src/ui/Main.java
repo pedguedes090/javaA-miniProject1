@@ -1,7 +1,10 @@
 package ui;
-public class Main {
-    public static void main(String[] args) {
-        MainMenu mainMenu= new MainMenu();
 
+import exception.InvalidOrderIdException;
+
+public class Main {
+    public static void main(String[] args) throws InvalidOrderIdException {
+        MainMenu mainMenu= new MainMenu();
+        mainMenu.main(args);
     }
 }
