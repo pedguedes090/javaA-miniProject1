@@ -1,26 +1,61 @@
 package model;
 
-// Món ăn trong đơn hàng
+// Item line in an order
 public class OrderItem {
 
-    private MenuItem menuItem; // món ăn
-    private int quantity;      // số lượng
+    private MenuItem menuItem;
+    private int quantity;
+    private double unitPrice;
 
     public OrderItem(MenuItem menuItem, int quantity) {
-        this.menuItem = menuItem;
-        this.quantity = quantity;
+        this(menuItem, quantity, menuItem != null ? menuItem.calculatePrice() : 0.0);
     }
 
-    // tính tiền món
-    public double getTotalPrice() {
-        return menuItem.calculatePrice() * quantity;
+    public OrderItem(MenuItem menuItem, int quantity, double unitPrice) {
+        setMenuItem(menuItem);
+        setQuantity(quantity);
+        setUnitPrice(unitPrice);
     }
 
     public MenuItem getMenuItem() {
         return menuItem;
     }
 
+    public void setMenuItem(MenuItem menuItem) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("Menu item cannot be null");
+        }
+        this.menuItem = menuItem;
+    }
+
     public int getQuantity() {
         return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+        this.quantity = quantity;
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(double unitPrice) {
+        if (unitPrice < 0) {
+            throw new IllegalArgumentException("Unit price cannot be negative");
+        }
+        this.unitPrice = unitPrice;
+    }
+
+    public double getLineTotal() {
+        return unitPrice * quantity;
+    }
+
+    // Keep old name for existing code compatibility
+    public double getTotalPrice() {
+        return getLineTotal();
     }
 }
