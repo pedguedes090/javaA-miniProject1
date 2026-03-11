@@ -1,22 +1,23 @@
 package ui;
 
 import model.Order;
-import model.OrderItem;
-import model.OrderStatus;
 import service.OrderService;
-import util.InputHelper;
+import service.StatisticsService;
+import service.StatisticsService.ItemSales;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
 public class StatisticsUI {
 
     private OrderService orderService;
+    private StatisticsService statisticsService;
 
     public StatisticsUI(OrderService orderService) {
         this.orderService = orderService;
+        this.statisticsService = new StatisticsService();
     }
 
     public void menu() {
@@ -25,31 +26,26 @@ public class StatisticsUI {
 
             System.out.println("""
                     ===== STATISTICS =====
-                    1. Total orders
-                    2. Revenue
-                    3. Orders by status
-                    4. Best selling items
+                    1. Revenue by day
+                    2. Revenue by month
+                    3. Top selling items
                     0. Back
                     """);
 
-            int choice = InputHelper.inputInt("Your choice: ");
+            int choice = util.InputHelper.inputInt("Your choice: ");
 
             switch (choice) {
 
                 case 1:
-                    showTotalOrders();
+                    showRevenueByDay();
                     break;
 
                 case 2:
-                    showRevenue();
+                    showRevenueByMonth();
                     break;
 
                 case 3:
-                    showOrdersByStatus();
-                    break;
-
-                case 4:
-                    showBestSellingItems();
+                    showTopSelling();
                     break;
 
                 case 0:
@@ -61,82 +57,64 @@ public class StatisticsUI {
         }
     }
 
-    private void showTotalOrders() {
+    private void showRevenueByDay() {
 
         List<Order> orders = orderService.getOrders();
 
-        System.out.println("Total orders: " + orders.size());
-    }
+        Map<LocalDate, Double> result =
+                statisticsService.revenueByDay(orders);
 
-    private void showRevenue() {
-
-        double revenue = 0;
-
-        for (Order order : orderService.getOrders()) {
-
-            if (order.getStatus() == OrderStatus.PAID) {
-
-                for (OrderItem item : order.getItems()) {
-                    revenue += item.getLineTotal();
-                }
-            }
+        if (result.isEmpty()) {
+            System.out.println("No data");
+            return;
         }
 
-        System.out.println("Total revenue: " + revenue);
+        System.out.println("=== Revenue By Day ===");
+
+        for (LocalDate date : result.keySet()) {
+            System.out.println(date + " : " + result.get(date));
+        }
     }
 
-    private void showOrdersByStatus() {
+    private void showRevenueByMonth() {
 
-        int pending = 0;
-        int paid = 0;
-        int cancelled = 0;
+        List<Order> orders = orderService.getOrders();
+        Map<YearMonth, Double> result =
+                statisticsService.revenueByMonth(orders);
 
-        for (Order order : orderService.getOrders()) {
-
-            switch (order.getStatus()) {
-
-                case PENDING:
-                    pending++;
-                    break;
-
-                case PAID:
-                    paid++;
-                    break;
-
-                case CANCELLED:
-                    cancelled++;
-                    break;
-            }
+        if (result.isEmpty()) {
+            System.out.println("No data");
+            return;
         }
 
-        System.out.println("Pending: " + pending);
-        System.out.println("Paid: " + paid);
-        System.out.println("Cancelled: " + cancelled);
+        System.out.println("=== Revenue By Month ===");
+
+        for (YearMonth month : result.keySet()) {
+            System.out.println(month + " : " + result.get(month));
+        }
     }
 
-    private void showBestSellingItems() {
+    private void showTopSelling() {
 
-        Map<String, Integer> counter = new HashMap<>();
+        List<Order> orders = orderService.getOrders();
 
-        for (Order order : orderService.getOrders()) {
+        List<ItemSales> list =
+                statisticsService.getTopSellingItems(orders);
 
-            for (OrderItem item : order.getItems()) {
-
-                String name = item.getMenuItem().getName();
-                int quantity = item.getQuantity();
-
-                counter.put(name, counter.getOrDefault(name, 0) + quantity);
-            }
+        if (list.isEmpty()) {
+            System.out.println("No data");
+            return;
         }
 
+        System.out.println("=== Top Selling Items ===");
 
-        System.out.println("=== Best Selling Items ===");
-        List<Map.Entry<String, Integer>> list = new ArrayList<>(counter.entrySet());
+        for (ItemSales item : list) {
 
-        // sort giảm dần theo quantity
-        list.sort((a, b) -> b.getValue().compareTo(a.getValue()));
-        for (String name : counter.keySet()) {
-            System.out.println(name + " : " + counter.get(name));
+            System.out.println(
+                    item.getName()
+                            + " | Quantity: " + item.getQuantity()
+                            + " | Revenue: " + item.getRevenue()
+            );
         }
     }
 }

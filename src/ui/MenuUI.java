@@ -8,13 +8,14 @@ import model.Drink;
 import model.Food;
 import model.MenuItem;
 import service.MenuService;
+import service.SearchService;
 import util.IdGenerator;
 import util.InputHelper;
 import java.util.List;
 
 public class MenuUI {
     private MenuService menuService;
-
+    private SearchService searchService = new SearchService();
     public MenuUI(MenuService menuService) {
         this.menuService = menuService;
     }
@@ -98,12 +99,55 @@ public class MenuUI {
     }
 
     private void searchItem() {
-        String keyword = InputHelper.inputString("Enter keyword: ");
-        List<MenuItem> result = menuService.search(keyword);
-        if (result.isEmpty()) {
+
+        System.out.println("""
+            ===== SEARCH MENU =====
+            1. Search by name
+            2. Search by price range
+            """);
+
+        int choice = InputHelper.inputInt("Your choice: ");
+
+        List<MenuItem> result = null;
+
+        switch (choice) {
+
+            case 1:
+
+                String keyword = InputHelper.inputString("Enter name: ");
+
+                result = searchService.searchByName(
+                        menuService.getMenu(),
+                        keyword
+                );
+
+                break;
+
+            case 2:
+
+                double min = InputHelper.inputDouble("Enter min price: ");
+                double max = InputHelper.inputDouble("Enter max price: ");
+
+                result = searchService.searchByPriceRange(
+                        menuService.getMenu(),
+                        min,
+                        max
+                );
+
+                break;
+
+            default:
+                System.out.println("Invalid choice");
+                return;
+        }
+
+        if (result == null || result.isEmpty()) {
             System.out.println("No item found");
             return;
         }
+
+        System.out.println("=== Search Result ===");
+
         for (MenuItem item : result) {
             System.out.println(item);
         }
