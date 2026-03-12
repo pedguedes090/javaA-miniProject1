@@ -1,6 +1,5 @@
 package model;
 
-// Item line in an order
 public class OrderItem {
 
     private MenuItem menuItem;
@@ -54,7 +53,6 @@ public class OrderItem {
         return unitPrice * quantity;
     }
 
-    // Keep old name for existing code compatibility
     public double getTotalPrice() {
         return getLineTotal();
     }

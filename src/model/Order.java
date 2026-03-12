@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Customer order
 public class Order {
 
     private String orderId;
@@ -48,7 +47,6 @@ public class Order {
         items.remove(item);
     }
 
-    // Subtotal of all items
     public double calculateTotal() {
         return items.stream()
                 .mapToDouble(OrderItem::getLineTotal)
@@ -63,7 +61,6 @@ public class Order {
         return orderId;
     }
 
-    // Keep old getter for compatibility with current services
     public String getId() {
         return orderId;
     }
